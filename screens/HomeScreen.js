@@ -1,5 +1,5 @@
 import * as WebBrowser from 'expo-web-browser';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Image,
   Platform,
@@ -10,67 +10,125 @@ import {
   View,
 } from 'react-native';
 
+import {
+  Card,
+  Button,
+  Icon
+} from 'react-native-elements'
+
+import moment from 'moment'
+
 import { MonoText } from '../components/StyledText';
 
 export default function HomeScreen() {
+  const [sensorState, setSensorState] = useState({
+    sensors: [
+      {
+        id: 1,
+        arduino_id: 1,
+        name: "GP2Y10",
+        value: 0,
+        unit: 'mg/m3',
+        time: 1575910564365,
+      },
+      {
+        id: 2,
+        arduino_id: 1,
+        name: "DHT11_T",
+        value: 0,
+        unit: '°C',
+        time: 1575910564365
+      },
+      {
+        id: 3,
+        arduino_id: 1,
+        name: "DHT11_H",
+        value: 0,
+        unit: '%',
+        time: 1575910564365
+      },
+    ]
+  })
+
+  useEffect(() => {
+    sensorState.sensors.map((u, i) => {
+      handleCardPress(null, u)
+    })
+  }, []);
+
+  function handleCardPress(e, u) {
+    fetch(`http://springbootiot1-env-1.rzpga2pgvr.us-east-1.elasticbeanstalk.com/arduino/live?amount=1&arduinoId=${u.arduino_id}&sensorId=${u.id}`)
+      .then((response) => response.json())
+      .then((responseJson) => {
+        let newVal = responseJson[0]
+        
+
+
+        let newState = sensorState.sensors.map((u, i) => {
+          if ((u.id == newVal.sensorInfo.id) && (u.arduino_id == newVal.arduinoInfo.id)) {
+            u.value = newVal.value
+            u.time = newVal.createtime
+            return u
+          }
+          return u
+        })
+        
+
+        setSensorState({sensors: newState})
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }
+
   return (
     <View style={styles.container}>
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.contentContainer}>
-        <View style={styles.welcomeContainer}>
-          <Image
-            source={
-              __DEV__
-                ? require('../assets/images/robot-dev.png')
-                : require('../assets/images/robot-prod.png')
-            }
-            style={styles.welcomeImage}
-          />
-        </View>
+        {
+          sensorState.sensors.map((u, i) => {
+            return (
+              <TouchableOpacity
+                key={i}
+                onPress={(e) => handleCardPress(e, u)}
+              >
 
-        <View style={styles.getStartedContainer}>
-          <DevelopmentModeNotice />
+                <Card
+                  title={u.name}
+                >
+                  <View style={{ alignItems: 'baseline', flexDirection: 'row', flexWrap: 'nowrap', justifyContent: 'space-between' }}>
+                    <View style={{ alignItems: 'baseline', justifyContent: 'flex-end', flexDirection: 'row', flexWrap: 'wrap' }}>
+                      <Text style={{ fontSize: 12, fontWeight: '100' }}>
+                        {moment(u.time).format("YYYY-MM-DD hh:mm:ss")}
+                      </Text>
+                    </View>
+                    <View style={{ alignItems: 'center', justifyContent: 'flex-end', flexDirection: 'row', flexWrap: 'wrap' }}>
+                      <Text style={{ fontSize: 40, fontWeight: 'bold' }}>
+                        {u.value.toFixed(1)}
+                      </Text>
+                      <Text style={{ fontSize: 18 }}>
+                        {" "+ u.unit}
+                      </Text>
+                    </View>
+                  </View>
 
-          <Text style={styles.getStartedText}>Get started by opening</Text>
 
-          <View
-            style={[styles.codeHighlightContainer, styles.homeScreenFilename]}>
-            <MonoText>screens/HomeScreen.js</MonoText>
-          </View>
+                </Card>
 
-          <Text style={styles.getStartedText}>
-            Change this text and your app will automatically reload.
-          </Text>
-        </View>
-
-        <View style={styles.helpContainer}>
-          <TouchableOpacity onPress={handleHelpPress} style={styles.helpLink}>
-            <Text style={styles.helpLinkText}>
-              Help, it didn’t automatically reload!
-            </Text>
-          </TouchableOpacity>
-        </View>
+              </TouchableOpacity>
+            )
+          })
+        }
+        
       </ScrollView>
 
-      <View style={styles.tabBarInfoContainer}>
-        <Text style={styles.tabBarInfoText}>
-          This is a tab bar. You can edit it in:
-        </Text>
-
-        <View
-          style={[styles.codeHighlightContainer, styles.navigationFilename]}>
-          <MonoText style={styles.codeHighlightText}>
-            navigation/MainTabNavigator.js
-          </MonoText>
-        </View>
-      </View>
     </View>
   );
 }
 
 HomeScreen.navigationOptions = {
-  header: null,
+  title: "Các cảm biến",
 };
 
 function DevelopmentModeNotice() {
@@ -121,7 +179,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   contentContainer: {
-    paddingTop: 30,
+    paddingTop: 8,
+    paddingBottom: 8
   },
   welcomeContainer: {
     alignItems: 'center',
