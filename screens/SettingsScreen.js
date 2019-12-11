@@ -1,14 +1,15 @@
-import React from 'react';
-import { ExpoConfigView } from '@expo/samples';
+import React, { Component } from "react";
+import { Button, View, Picker, Text } from "react-native";
+import DateTimePicker from "react-native-modal-datetime-picker";
 
-export default function SettingsScreen() {
-  /**
-   * Go ahead and delete ExpoConfigView and replace it with your content;
-   * we just wanted to give you a quick view of your config.
-   */
-  return <ExpoConfigView />;
+export default class DateTimePickerTester extends Component {
+  
+
+  render() {
+    return (
+      <View>
+        <Text>Vinh</Text>
+      </View>
+    );
+  }
 }
-
-SettingsScreen.navigationOptions = {
-  title: 'app.json',
-};

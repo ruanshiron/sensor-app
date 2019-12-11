@@ -20,7 +20,7 @@ import moment from 'moment'
 
 import { MonoText } from '../components/StyledText';
 
-export default function HomeScreen() {
+export default function HomeScreen(props) {
   const [sensorState, setSensorState] = useState({
     sensors: [
       {
@@ -28,7 +28,7 @@ export default function HomeScreen() {
         arduino_id: 1,
         name: "GP2Y10",
         value: 0,
-        unit: 'mg/m3',
+        unit: '10^-2mg/m3',
         time: 1575910564365,
       },
       {
@@ -49,13 +49,15 @@ export default function HomeScreen() {
       },
     ]
   })
+  
 
   useEffect(() => {
     sensorState.sensors.map((u, i) => {
       handleCardPress(null, u)
     })
+    
   }, []);
-
+  
   function handleCardPress(e, u) {
     fetch(`http://springbootiot1-env-1.rzpga2pgvr.us-east-1.elasticbeanstalk.com/arduino/live?amount=1&arduinoId=${u.arduino_id}&sensorId=${u.id}`)
       .then((response) => response.json())
@@ -131,41 +133,6 @@ HomeScreen.navigationOptions = {
   title: "Các cảm biến",
 };
 
-function DevelopmentModeNotice() {
-  if (__DEV__) {
-    const learnMoreButton = (
-      <Text onPress={handleLearnMorePress} style={styles.helpLinkText}>
-        Learn more
-      </Text>
-    );
-
-    return (
-      <Text style={styles.developmentModeText}>
-        Development mode is enabled: your app will be slower but you can use
-        useful development tools. {learnMoreButton}
-      </Text>
-    );
-  } else {
-    return (
-      <Text style={styles.developmentModeText}>
-        You are not in development mode: your app will run at full speed.
-      </Text>
-    );
-  }
-}
-
-function handleLearnMorePress() {
-  WebBrowser.openBrowserAsync(
-    'https://docs.expo.io/versions/latest/workflow/development-mode/'
-  );
-}
-
-function handleHelpPress() {
-  WebBrowser.openBrowserAsync(
-    'https://docs.expo.io/versions/latest/workflow/up-and-running/#cant-see-your-changes'
-  );
-}
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -187,6 +154,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 20,
   },
+
   welcomeImage: {
     width: 100,
     height: 80,
